@@ -1,50 +1,41 @@
-document.addEventListener('DOMContentLoaded', () => {
-  // Select form and feedback div
-  const form = document.getElementById('registration-form');
-  const feedbackDiv = document.getElementById('form-feedback');
+// Async function to fetch and display user data
+async function fetchUserData() {
+    const apiUrl = 'https://jsonplaceholder.typicode.com/users';
+    const dataContainer = document.getElementById('api-data');
 
-  // Listen to form submission
-  form.addEventListener('submit', function (event) {
-    event.preventDefault(); // Stop default submission
+    try {
+        // Fetch data from API
+        const response = await fetch(apiUrl);
 
-    // Retrieve and trim inputs
-    const username = document.getElementById('username').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value.trim();
+        // If response not ok, throw error
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
 
-    // Validation tracking
-    let isValid = true;
-    const messages = [];
+        // Convert to JSON
+        const users = await response.json();
 
-    // Username validation
-    if (username.length < 3) {
-      isValid = false;
-      messages.push('Username must be at least 3 characters long.');
+        // Clear the loading message
+        dataContainer.innerHTML = '';
+
+        // Create a UL element
+        const userList = document.createElement('ul');
+
+        // Loop through users and create LI for each
+        users.forEach(user => {
+            const li = document.createElement('li');
+            li.textContent = user.name;
+            userList.appendChild(li);
+        });
+
+        // Append the UL to the container
+        dataContainer.appendChild(userList);
+    } catch (error) {
+        // Handle errors
+        dataContainer.innerHTML = 'Failed to load user data.';
+        console.error('Error fetching data:', error);
     }
+}
 
-    // Email validation (basic check)
-    if (!email.includes('@') || !email.includes('.')) {
-      isValid = false;
-      messages.push('Please enter a valid email address.');
-    }
-
-    // Password validation
-    if (password.length < 8) {
-      isValid = false;
-      messages.push('Password must be at least 8 characters long.');
-    }
-
-    // Show feedback
-    feedbackDiv.style.display = 'block';
-
-    if (isValid) {
-      feedbackDiv.textContent = 'Registration successful!';
-      feedbackDiv.style.color = '#28a745';
-      feedbackDiv.style.backgroundColor = '#d4edda';
-    } else {
-      feedbackDiv.innerHTML = messages.join('<br>');
-      feedbackDiv.style.color = '#dc3545';
-      feedbackDiv.style.backgroundColor = '#ffbaba';
-    }
-  });
-});
+// Run the function after the DOM is loaded
+document.addEventListener('DOMContentLoaded', fetchUserData);
